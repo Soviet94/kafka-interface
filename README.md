@@ -32,5 +32,14 @@ You can configure your own but be sure to update the application.properties
 
 ### Step 4: Input Data
 
-Default Input data is available in the resources as [random-people-data.json](src/main/resources/random-people-data.json)
-If the setup is correct it will be loaded in and made available for consuming on project start.
+Default Input data is available in the resources as [random-people-data.json](src/main/resources/random-people-data.json). If the setup is correct it will be loaded in and made available for consuming on project start.
+
+### TODO
+
+Security
+
+Concurrency
+
+Filtering
+
+Unit Testing
