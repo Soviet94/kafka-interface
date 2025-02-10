@@ -1,11 +1,9 @@
 package com.example.kafka_interface.consumer;
 
 import com.example.kafka_interface.configuration.KafkaConfigProperties;
-import com.example.kafka_interface.person.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.WakeupException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,7 @@ public class KafkaConsumerService {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
 
+    //Make into singleton?
     @Autowired
     public KafkaConsumerService(KafkaConfigProperties kafkaConfigProperties) {
         this.kafkaConfigProperties = kafkaConfigProperties;
@@ -43,29 +42,32 @@ public class KafkaConsumerService {
         this.objectMapper = new ObjectMapper();
     }
 
-    // Consume messages from the specified topic and offset, with the count limit
+    //Possible Kafka Consumer Heartbeat/Session Management
+    //Consume messages from the specified topic and offset, with the count limit
     public List<String> consumeFromTopic(String topicName, long offset, int count) {
         List<String> messages = new ArrayList<>();
+        logger.info("Starting to consume messages from topic: {}, offset: {}, count: {}", topicName, offset, count);
 
         try {
-            // Get partitions for the topic
+            //Get partitions for the topic
             List<TopicPartition> partitions = new ArrayList<>();
             consumer.partitionsFor(topicName).forEach(partitionInfo ->
                     partitions.add(new TopicPartition(topicName, partitionInfo.partition()))
             );
 
-            // Assign consumer to partitions
+            //Assign consumer to partitions
             consumer.assign(partitions);
 
-            // Seek to the specified offset for each partition
+            //Seek to the specified offset for each partition
+            //Offset Management? scenarios where offsets could be invalid or out of range
             for (TopicPartition partition : partitions) {
                 consumer.seek(partition, offset);
             }
 
-            // Poll for messages
+            //Poll for messages
             int recordsConsumed = 0;
             while (recordsConsumed < count) {
-                ConsumerRecords<String, String> records = consumer.poll(1000); // 1 second timeout
+                ConsumerRecords<String, String> records = consumer.poll(1000);
 
                 for (ConsumerRecord<String, String> record : records) {
                     if (recordsConsumed >= count) {
@@ -77,7 +79,7 @@ public class KafkaConsumerService {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error("Error while consuming messages", e);
             throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
         } finally {
             consumer.close();

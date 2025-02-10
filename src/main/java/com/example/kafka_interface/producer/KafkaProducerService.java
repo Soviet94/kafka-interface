@@ -34,7 +34,7 @@ public class KafkaProducerService {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaProducerService.class);
 
-    // Constructor that initializes KafkaProducer using injected config properties
+    //Constructor that initializes KafkaProducer using injected config properties
     @Autowired
     public KafkaProducerService(KafkaConfigProperties kafkaConfigProperties) {
         this.kafkaConfigProperties = kafkaConfigProperties;
@@ -51,16 +51,16 @@ public class KafkaProducerService {
         objectMapper = new ObjectMapper();
     }
 
-    // Method to load JSON records into Kafka topic
+    //Method to load JSON records into Kafka topic
     public void loadJsonToKafka() throws IOException {
         // Read the JSON file into a list of people
         PeopleWrapper peopleWrapper = objectMapper.readValue(new File(resource.getURI()), PeopleWrapper.class);
 
-        // Get the list of people from the wrapper
+        //Get the list of people from the wrapper
         List<Person> people = peopleWrapper.getPeople();
         logger.info("Found {} people", people.size());
 
-        // Send each person as a Kafka message
+        //Send each person as a Kafka message
         for (Person person : people) {
             String personJson = objectMapper.writeValueAsString(person);
             producer.send(new ProducerRecord<>(kafkaTopic, null, personJson), (metadata, exception) -> {
@@ -73,7 +73,7 @@ public class KafkaProducerService {
         }
     }
 
-    // Close the Kafka producer
+    //Close the Kafka producer
     public void close() {
         producer.close();
     }

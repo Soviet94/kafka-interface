@@ -15,17 +15,17 @@ public class KafkaInterfaceApplication {
 	public static void main(String[] args) {
 		ApplicationContext context = SpringApplication.run(KafkaInterfaceApplication.class, args);
 
-		//load the records
-		// Get the KafkaProducerService from Spring context
+		//Load the records
+		//Get the KafkaProducerService from Spring context
 		KafkaProducerService kafkaProducerService = context.getBean(KafkaProducerService.class);
 
 		try {
-			// Call loadJsonToKafka to load the records from the JSON file and send them to Kafka
+			//Call loadJsonToKafka to load the records from the JSON file and send them to Kafka
 			kafkaProducerService.loadJsonToKafka();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
-			// Close the producer after the task is done
+			//Close the producer after the task is done
 			kafkaProducerService.close();
 		}
 	}
