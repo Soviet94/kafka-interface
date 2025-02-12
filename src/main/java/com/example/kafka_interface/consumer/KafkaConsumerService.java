@@ -18,33 +18,31 @@ import java.util.Properties;
 @Service
 public class KafkaConsumerService {
 
-    private final KafkaConsumer<String, String> consumer;
     private final ObjectMapper objectMapper;
-
-    private final KafkaConfigProperties kafkaConfigProperties;
+    private Properties properties;
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
 
     //Make into singleton?
     @Autowired
     public KafkaConsumerService(KafkaConfigProperties kafkaConfigProperties) {
-        this.kafkaConfigProperties = kafkaConfigProperties;
 
         Properties properties = new Properties();
         properties.put("bootstrap.servers", kafkaConfigProperties.getBootstrapServers());
         properties.put("key.deserializer", kafkaConfigProperties.getKeyDeserializer());
         properties.put("value.deserializer", kafkaConfigProperties.getValueDeserializer());
 
-        properties.put("group.id", "person-consumer-group");
         properties.put("enable.auto.commit", "false");
 
-        this.consumer = new KafkaConsumer<>(properties);
+        this.properties = properties;
         this.objectMapper = new ObjectMapper();
     }
 
     //Possible Kafka Consumer Heartbeat/Session Management
     //Consume messages from the specified topic and offset, with the count limit
     public List<String> consumeFromTopic(String topicName, long offset, int count) {
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+
         List<String> messages = new ArrayList<>();
         logger.info("Starting to consume messages from topic: {}, offset: {}, count: {}", topicName, offset, count);
 
@@ -68,6 +66,11 @@ public class KafkaConsumerService {
             int recordsConsumed = 0;
             while (recordsConsumed < count) {
                 ConsumerRecords<String, String> records = consumer.poll(1000);
+
+                //If there are fewer records than requested break the loop
+                if (records.isEmpty()) {
+                    break;
+                }
 
                 for (ConsumerRecord<String, String> record : records) {
                     if (recordsConsumed >= count) {
