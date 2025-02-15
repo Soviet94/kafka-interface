@@ -40,4 +40,23 @@ public class KafkaConsumerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of("Error consuming messages: " + e.getMessage()));
         }
     }
+
+    //GET endpoint to find a topic
+    @GetMapping("/{topicName}")
+    public ResponseEntity<Void> findTopic(@PathVariable String topicName) {
+        try {
+            //Consume messages starting from the provided offset
+            boolean found = kafkaConsumerService.findTopic(topicName);
+
+            if (found) {
+                return ResponseEntity.status(HttpStatus.FOUND).build();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+        } catch (Exception e) {
+            logger.error("Error finding topic", e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

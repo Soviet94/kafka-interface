@@ -2,6 +2,8 @@ package com.example.kafka_interface.consumer;
 
 import com.example.kafka_interface.configuration.KafkaConfigProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.ListTopicsResult;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class KafkaConsumerService {
@@ -89,5 +92,16 @@ public class KafkaConsumerService {
         }
         logger.info("Returning {} messages", messages.size());
         return messages;
+    }
+
+    public boolean findTopic(String topicName) {
+        AdminClient admin = AdminClient.create(properties);
+
+        try {
+            ListTopicsResult result = admin.listTopics();
+            return result.names().get().contains(topicName);
+        } catch (InterruptedException | ExecutionException e) {
+            return false;
+        }
     }
 }
