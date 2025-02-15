@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpServerErrorException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -34,10 +36,10 @@ public class KafkaConsumerController {
             //Consume messages starting from the provided offset
             List<String> messages = kafkaConsumerService.consumeFromTopic(topicName, offset, count);
             return ResponseEntity.ok(messages);
-        } catch (Exception e) {
+        } catch (HttpServerErrorException e) {
             logger.error("Error while consuming messages", e);
             //Handle errors (e.g., wrong topic, offset, etc.)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of("Error consuming messages: " + e.getMessage()));
+            return ResponseEntity.status(e.getStatusCode()).body(new ArrayList<>());
         }
     }
 

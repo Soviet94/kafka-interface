@@ -50,8 +50,14 @@ public class KafkaConsumerService {
         logger.info("Starting to consume messages from topic: {}, offset: {}, count: {}", topicName, offset, count);
 
         try {
+            //check if the topic exists
+            if (!findTopic(topicName)) {
+                throw new HttpServerErrorException(HttpStatus.NOT_FOUND);
+            }
+
             //Get partitions for the topic
             List<TopicPartition> partitions = new ArrayList<>();
+
             consumer.partitionsFor(topicName).forEach(partitionInfo ->
                     partitions.add(new TopicPartition(topicName, partitionInfo.partition()))
             );
